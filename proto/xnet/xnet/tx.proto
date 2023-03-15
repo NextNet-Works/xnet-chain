@@ -1,0 +1,7 @@
+syntax = "proto3";
+package xnet.xnet;
+
+option go_package = "xnet/x/xnet/types";
+
+// Msg defines the Msg service.
+service Msg {}

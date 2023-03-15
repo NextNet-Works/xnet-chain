@@ -1,0 +1,12 @@
+syntax = "proto3";
+package xnet.xnet;
+
+import "gogoproto/gogo.proto";
+import "xnet/xnet/params.proto";
+
+option go_package = "xnet/x/xnet/types";
+
+// GenesisState defines the xnet module's genesis state.
+message GenesisState {
+  Params params = 1 [(gogoproto.nullable) = false];
+}
