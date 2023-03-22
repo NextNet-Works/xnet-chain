@@ -106,6 +106,7 @@ import (
 	xnetmodule "xnet/x/xnet"
 	xnetmodulekeeper "xnet/x/xnet/keeper"
 	xnetmoduletypes "xnet/x/xnet/types"
+
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "xnet/app/params"
@@ -113,7 +114,7 @@ import (
 )
 
 const (
-	AccountAddressPrefix = "cosmos"
+	AccountAddressPrefix = "xnet"
 	Name                 = "xnet"
 )
 
