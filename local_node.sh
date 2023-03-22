@@ -7,7 +7,7 @@ CHAINID="xnet_03012023-1"
 MONIKER="localtestnet"
 # Remember to change to other types of keyring like 'file' in-case exposing to outside world,
 # otherwise your balance will be wiped quickly
-# The keyring test does not require private key to steal uCCs from you
+# The keyring test does not require private key to steal uxnets from you
 KEYRING="test"
 LOGLEVEL="info"
 # Set dedicated home directory for the xnetd instance
@@ -61,11 +61,11 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 	# Set moniker and chain-id for xnet (Moniker can be anything, chain-id must be an integer)
 	xnetd init $MONIKER -o --chain-id $CHAINID --home "$HOMEDIR"
 
-	# Change parameter uCC denominations to uCC
-	jq '.app_state["staking"]["params"]["bond_denom"]="uCC"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	jq '.app_state["crisis"]["constant_fee"]["denom"]="uCC"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	jq '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="uCC"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	jq '.app_state["mint"]["params"]["mint_denom"]="uCC"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+	# Change parameter uxnet denominations to uxnet
+	jq '.app_state["staking"]["params"]["bond_denom"]="uxnet"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+	jq '.app_state["crisis"]["constant_fee"]["denom"]="uxnet"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+	jq '.app_state["gov"]["deposit_params"]["min_deposit"][0]["denom"]="uxnet"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+	jq '.app_state["mint"]["params"]["mint_denom"]="uxnet"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 	# Set gas limit in genesis
 	jq '.consensus_params["block"]["max_gas"]="10000000"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
@@ -114,16 +114,16 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 
 	# Allocate genesis accounts (cosmos formatted addresses)
 	for KEY in "${KEYS[@]}"; do
-		xnetd add-genesis-account "$KEY" 100000000000000000000000000uCC --keyring-backend $KEYRING --home "$HOMEDIR"
+		xnetd add-genesis-account "$KEY" 100000000000000000000000000uxnet --keyring-backend $KEYRING --home "$HOMEDIR"
 	done
 
 	# bc is required to add these big numbers
 	total_supply=$(echo "${#KEYS[@]} * 100000000000000000000000000" | bc)
 	jq -r --arg total_supply "$total_supply" '.app_state["bank"]["supply"][0]["amount"]=$total_supply' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
-	jq -r --arg total_supply "$total_supply" '.app_state["bank"]["supply"][0]["denom"]="uCC"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
+	jq -r --arg total_supply "$total_supply" '.app_state["bank"]["supply"][0]["denom"]="uxnet"' "$GENESIS" >"$TMP_GENESIS" && mv "$TMP_GENESIS" "$GENESIS"
 
 	# Sign genesis transaction
-	xnetd gentx "${KEYS[0]}" 1000000000000000000000uCC --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"  --commission-max-change-rate=0.01 --commission-max-rate=1.0 --commission-rate=0.07
+	xnetd gentx "${KEYS[0]}" 1000000000000000000000uxnet --keyring-backend $KEYRING --chain-id $CHAINID --home "$HOMEDIR"  --commission-max-change-rate=0.01 --commission-max-rate=1.0 --commission-rate=0.07
 	## In case you want to create multiple validators at genesis
 	## 1. Back to `xnetd keys add` step, init more keys
 	## 2. Back to `xnetd add-genesis-account` step, add balance for those
@@ -143,4 +143,4 @@ if [[ $overwrite == "y" || $overwrite == "Y" ]]; then
 fi
 
 # Start the node (remove the --pruning=nothing flag if historical queries are not needed)
-xnetd start "$TRACE" --log_level $LOGLEVEL --minimum-gas-prices=0.0001uCC --api.enable --home "$HOMEDIR"
+xnetd start "$TRACE" --log_level $LOGLEVEL --minimum-gas-prices=0.0001uxnet --api.enable --home "$HOMEDIR"
