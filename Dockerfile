@@ -9,7 +9,7 @@ RUN apk add --update --no-cache $PACKAGES
 WORKDIR /go/src/github.com/NextNet-Works/
 
 # Add source files
-RUN git clone --recursive https://https://github.com/NextNet-Works/xnet-chain.git
+RUN git clone --recursive https://github.com/NextNet-Works/xnet-chain.git
 WORKDIR /go/src/github.com/NextNet-Works/xnet-chain
 
 RUN make install
@@ -34,9 +34,9 @@ RUN install -m 0755 -o root -g root -t /usr/local/bin xnetd
 RUN rm -r /tmp/bin
 
 # Add supervisor configuration files
-RUN mkdir -p /etc/supervisor/conf.d/
-COPY /supervisor/supervisord.conf /etc/supervisor/supervisord.conf 
-COPY /supervisor/conf.d/* /etc/supervisor/conf.d/
+# RUN mkdir -p /etc/supervisor/conf.d/
+# COPY /supervisor/supervisord.conf /etc/supervisor/supervisord.conf 
+# COPY /supervisor/conf.d/* /etc/supervisor/conf.d/
 
 
 WORKDIR $XNETD_HOME

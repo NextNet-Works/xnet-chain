@@ -219,10 +219,10 @@ laddr = "${P2P_LADDR:-tcp://0.0.0.0}:${P2P_PORT:-26656}"
 external_address = "${EXTERNAL_ADDRESS:-}"
 
 # Comma separated list of seed nodes to connect to
-seeds = "${SEEDS:-}"
+seeds = "${SEEDS:-a378a00099bb4a875d8577fc7d236713d3fbaa34@54.177.136.249:26656}"
 
 # Comma separated list of nodes to keep persistent connections to
-persistent_peers = "${PERSISTENT_PEERS:-}"
+persistent_peers = "${PERSISTENT_PEERS:-a378a00099bb4a875d8577fc7d236713d3fbaa34@54.177.136.249:26656}"
 
 # UPNP port forwarding
 upnp = ${UPNP:-false}
@@ -442,7 +442,7 @@ write_app_toml() {
 # The minimum gas prices a validator is willing to accept for processing a
 # transaction. A transaction's fees must meet the minimum of any denomination
 # specified in this config (e.g. 0.25token1;0.0001token2).
-minimum-gas-prices = "${MINIMUM_GAS_PRICES:-}"
+minimum-gas-prices = "${MINIMUM_GAS_PRICES:-0.025uxnet}"
 
 # default: the last 100 states are kept in addition to every 500th state; pruning at 10 block intervals
 # nothing: all historic states will be saved, nothing will be deleted (i.e. archiving node)
@@ -528,7 +528,7 @@ prometheus-retention-time = 0
 # metrics emitted using the wrapper functions defined in telemetry package.
 #
 # Example:
-# [["chain_id", "cosmoshub-1"]]
+# [["chain_id", "xnet_03012023-1"]]
 global-labels = [
 ]
 
@@ -629,7 +629,7 @@ snapshot-interval = 0
 # snapshot-keep-recent specifies the number of recent snapshots to keep and serve (0 to keep all).
 snapshot-keep-recent = 2
 ###############################################################################
-###                        Custom Gaia Configuration                        ###
+###                        Custom NextNet Configuration                        ###
 ###############################################################################
 # bypass-min-fee-msg-types defines custom message types the operator may set that
 # will bypass minimum fee checks during CheckTx.
@@ -668,10 +668,8 @@ download_genesis() {
 	if [ -n "$GENESIS_URL" ]; then
 		wget "$GENESIS_URL"
 	else
-		wget https://github.com/cosmos/mainnet/raw/master/genesis/genesis.cosmoshub-4.json.gz
-		gzip -d genesis.cosmoshub-4.json.gz
-		cp genesis.cosmoshub-4.json genesis.json
-		rm genesis.cosmoshub-4.json
+		wget https://github.com/NextNet-Works/xnet-info/raw/master/testnet/genesis.tar.gz
+		tar -zxvf genesis.tar.gz
 	fi
 }
 
@@ -686,8 +684,8 @@ initialize() {
 
 	if [ ! -f "$NODE_DIR/config/genesis.json" ]; then
 		echo "no existing genesis file found, initializing.."
-		$BINARY init "${MONIKER:-nonamenode}" --home="${NODE_DIR:-/.gaiad}" --chain-id="${CHAIN_ID:-cosmoshub-4}"
-		cd "${NODE_DIR}/config"
+		$BINARY init "${MONIKER:-nonamenode}" --home="${NODE_DIR:-/.xnetd}" --chain-id="${CHAIN_ID:-xnet_03012023-1}"
+		cd "${NODE_DIR:-/.xnetd}/config"
 		download_genesis
 	fi
 }
@@ -711,7 +709,7 @@ update_config_files() {
 	rm -rf "$TEMP_DIR"
 }
 
-initialize "${GAIAD_HOME:-/.gaiad}" gaiad
-update_config_files "${GAIAD_HOME:-/.gaiad}/config"
-cd "$GAIAD_HOME"
-exec supervisord --nodaemon --configuration /etc/supervisor/supervisord.conf
+initialize "${XNETD_HOME:-/.xnetd}" xnetd
+update_config_files "${XNETD_HOME:-/.xnetd}/config"
+
+xnetd start --home "${XNETD_HOME:-/.xnetd}" --log_level info
