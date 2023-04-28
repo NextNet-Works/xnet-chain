@@ -1,0 +1,12 @@
+syntax = "proto3";
+package xnet.nextibc;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "xnet/x/nextibc/types";
+
+// Params defines the parameters for the module.
+message Params {
+  option (gogoproto.goproto_stringer) = false;
+  
+}

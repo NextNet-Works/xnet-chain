@@ -1,0 +1,7 @@
+syntax = "proto3";
+package xnet.nextibc;
+
+option go_package = "xnet/x/nextibc/types";
+
+// Msg defines the Msg service.
+service Msg {}

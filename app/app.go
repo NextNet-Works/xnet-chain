@@ -107,6 +107,9 @@ import (
 	xnetmodulekeeper "xnet/x/xnet/keeper"
 	xnetmoduletypes "xnet/x/xnet/types"
 
+	nextibcmodule "xnet/x/nextibc"
+	nextibcmodulekeeper "xnet/x/nextibc/keeper"
+	nextibcmoduletypes "xnet/x/nextibc/types"
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
 	appparams "xnet/app/params"
@@ -166,6 +169,7 @@ var (
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		xnetmodule.AppModuleBasic{},
+		nextibcmodule.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 	)
 
@@ -239,7 +243,9 @@ type App struct {
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 
-	XnetKeeper xnetmodulekeeper.Keeper
+	XnetKeeper          xnetmodulekeeper.Keeper
+	ScopedNextibcKeeper capabilitykeeper.ScopedKeeper
+	NextibcKeeper       nextibcmodulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -285,6 +291,7 @@ func New(
 		ibctransfertypes.StoreKey, icahosttypes.StoreKey, capabilitytypes.StoreKey, group.StoreKey,
 		icacontrollertypes.StoreKey,
 		xnetmoduletypes.StoreKey,
+		nextibcmoduletypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -504,6 +511,20 @@ func New(
 	)
 	xnetModule := xnetmodule.NewAppModule(appCodec, app.XnetKeeper, app.AccountKeeper, app.BankKeeper)
 
+	scopedNextibcKeeper := app.CapabilityKeeper.ScopeToModule(nextibcmoduletypes.ModuleName)
+	app.ScopedNextibcKeeper = scopedNextibcKeeper
+	app.NextibcKeeper = *nextibcmodulekeeper.NewKeeper(
+		appCodec,
+		keys[nextibcmoduletypes.StoreKey],
+		keys[nextibcmoduletypes.MemStoreKey],
+		app.GetSubspace(nextibcmoduletypes.ModuleName),
+		app.IBCKeeper.ChannelKeeper,
+		&app.IBCKeeper.PortKeeper,
+		scopedNextibcKeeper,
+	)
+	nextibcModule := nextibcmodule.NewAppModule(appCodec, app.NextibcKeeper, app.AccountKeeper, app.BankKeeper)
+
+	nextibcIBCModule := nextibcmodule.NewIBCModule(app.NextibcKeeper)
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
 	/**** IBC Routing ****/
@@ -515,6 +536,7 @@ func New(
 	ibcRouter := ibcporttypes.NewRouter()
 	ibcRouter.AddRoute(icahosttypes.SubModuleName, icaHostIBCModule).
 		AddRoute(ibctransfertypes.ModuleName, transferIBCModule)
+	ibcRouter.AddRoute(nextibcmoduletypes.ModuleName, nextibcIBCModule)
 	// this line is used by starport scaffolding # ibc/app/router
 	app.IBCKeeper.SetRouter(ibcRouter)
 
@@ -570,6 +592,7 @@ func New(
 		transferModule,
 		icaModule,
 		xnetModule,
+		nextibcModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 
@@ -600,6 +623,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		xnetmoduletypes.ModuleName,
+		nextibcmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 	)
 
@@ -625,6 +649,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		xnetmoduletypes.ModuleName,
+		nextibcmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 	)
 
@@ -655,6 +680,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		xnetmoduletypes.ModuleName,
+		nextibcmoduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 	)
 
@@ -685,6 +711,7 @@ func New(
 		ibc.NewAppModule(app.IBCKeeper),
 		transferModule,
 		xnetModule,
+		nextibcModule,
 		// this line is used by starport scaffolding # stargate/app/appModule
 	)
 	app.sm.RegisterStoreDecoders()
@@ -890,6 +917,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
 	paramsKeeper.Subspace(xnetmoduletypes.ModuleName)
+	paramsKeeper.Subspace(nextibcmoduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

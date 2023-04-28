@@ -1,0 +1,13 @@
+syntax = "proto3";
+package xnet.nextibc;
+
+option go_package = "xnet/x/nextibc/types";
+
+message NextibcPacketData {
+    oneof packet {
+        NoData noData = 1;
+    }
+}
+
+message NoData {
+}

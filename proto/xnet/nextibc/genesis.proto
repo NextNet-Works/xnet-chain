@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package xnet.nextibc;
+
+import "gogoproto/gogo.proto";
+import "xnet/nextibc/params.proto";
+
+option go_package = "xnet/x/nextibc/types";
+
+// GenesisState defines the nextibc module's genesis state.
+message GenesisState {
+  Params params  = 1 [(gogoproto.nullable) = false];
+  string port_id = 2;
+}
+
